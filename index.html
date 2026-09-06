@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuaderno de Campo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde-900:#16281C; --verde-800:#1D3423; --verde-700:#23422C; --verde-500:#3B6B45; --verde-100:#DCE7DC;
+    --beige-50:#F7F4EC; --beige-100:#EFE9DA;
+    --gris-900:#26261F; --gris-600:#6B6A61; --gris-300:#D8D4C4;
+    --white:#FFFFFF;
+    --danger:#B3462C; --warning:#C97B2E; --good:#3B6B45; --info:#3F5866;
+    --radius:12px;
+    --shadow: 0 1px 2px rgba(22,40,28,0.06), 0 4px 14px rgba(22,40,28,0.08);
+  }
+  body.dark{
+    --beige-50:#181812; --beige-100:#221F17;
+    --gris-900:#EEEAE0; --gris-600:#B4AF9E; --gris-300:#3B3A30;
+    --white:#221F17;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background:var(--beige-50); color:var(--gris-900); font-family:'Inter',sans-serif; transition: background .15s ease, color .15s ease; }
+  h1,h2,h3,.brand,.gate-title{ font-family:'Manrope',sans-serif; }
+  button, input, select, textarea{ font-family:inherit; }
+
+  /* ---------- Profile gate ---------- */
+  #profile-gate{ position:fixed; inset:0; z-index:100; background: linear-gradient(160deg, var(--verde-900), var(--verde-700)); display:flex; align-items:center; justify-content:center; padding: 24px; }
+  .gate-card{ background: var(--beige-50); border-radius: 20px; padding: 40px 30px; max-width: 480px; width: 100%; text-align:center; box-shadow: 0 20px 60px rgba(0,0,0,0.35); }
+  .gate-card .logo-mark{ width:56px; height:56px; margin-bottom:14px; }
+  .gate-title{ font-size:23px; font-weight:800; color:var(--verde-900); margin:0 0 6px; }
+  .gate-sub{ font-size:14px; color:var(--gris-600); margin:0 0 26px; }
+  .user-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .user-btn{ display:flex; flex-direction:column; align-items:center; gap:8px; background:var(--white); border:1.5px solid var(--gris-300); border-radius: 14px; padding: 18px 10px; cursor:pointer; transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease; }
+  .user-btn:hover{ transform: translateY(-2px); border-color:var(--verde-500); box-shadow:var(--shadow); }
+  .user-avatar{ width:46px; height:46px; border-radius:50%; background:var(--verde-700); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:17px; }
+  .user-btn span.name{ font-weight:700; font-size:14.5px; color:var(--gris-900); }
+
+  /* ---------- App shell ---------- */
+  #app-content{ display:none; }
+  header.topbar{ background: var(--verde-900); color:#fff; position: sticky; top:0; z-index:20; }
+  .topbar-inner{ max-width: 960px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding: 12px 18px; gap: 10px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .logo-mark{ width:34px; height:34px; flex-shrink:0; }
+  .brand-text{ display:flex; flex-direction:column; line-height:1.1; }
+  .brand-text .name{ font-weight:800; font-size:16.5px; }
+  .brand-text .tag{ font-size:10.5px; color:var(--verde-100); letter-spacing:0.04em; text-transform:uppercase; }
+  .topbar-actions{ display:flex; align-items:center; gap:8px; }
+  .icon-round{ background: rgba(255,255,255,0.14); border:none; color:#fff; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; }
+  .icon-round:hover{ background: rgba(255,255,255,0.24); }
+  .user-chip{ display:flex; align-items:center; gap:8px; background: rgba(255,255,255,0.1); border-radius: 999px; padding: 6px 8px 6px 12px; font-size: 13px; }
+  .user-chip .dot{ width:24px; height:24px; border-radius:50%; background: var(--verde-500); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
+  .user-chip button{ background: rgba(255,255,255,0.14); border:none; color:#fff; font-weight:600; font-size:12px; padding: 5px 10px; border-radius: 999px; cursor:pointer; }
+  .user-chip button:hover{ background: rgba(255,255,255,0.24); }
+
+  nav.tabs{ background: var(--verde-800); overflow-x:auto; scrollbar-width:none; }
+  nav.tabs::-webkit-scrollbar{ display:none; }
+  .tabs-inner{ max-width:960px; margin:0 auto; display:flex; gap:2px; padding: 0 12px; }
+  .tab-btn{ background:none; border:none; cursor:pointer; color: var(--verde-100); font-weight:600; font-size:13.5px; padding: 13px 16px; white-space:nowrap; border-bottom: 3px solid transparent; display:flex; align-items:center; gap:6px; }
+  .tab-btn.active{ color:#fff; border-bottom-color: var(--warning); }
+
+  .sync-banner{ max-width:960px; margin:0 auto; padding:10px 16px; font-size:12.5px; font-weight:600; display:none; }
+  .sync-banner.info{ background:var(--verde-100); color:var(--verde-800); }
+  .sync-banner.warn{ background:#F5DCC0; color:#7A3B12; }
+
+  .search-bar{ max-width:960px; margin:0 auto; padding: 10px 16px; position:relative; }
+  .search-bar input{ width:100%; font-size:14px; padding:10px 14px; border-radius:10px; border:1.5px solid var(--gris-300); background:var(--white); color:var(--gris-900); }
+  .search-results{ display:none; position:absolute; left:16px; right:16px; top:56px; background:var(--white); border:1px solid var(--gris-300); border-radius:10px; box-shadow:var(--shadow); max-height:340px; overflow-y:auto; z-index:30; }
+  .search-result{ padding:10px 14px; border-bottom:1px solid var(--gris-300); cursor:pointer; display:flex; flex-direction:column; gap:2px; }
+  .search-result:last-child{ border-bottom:none; }
+  .search-result:hover{ background:var(--beige-100); }
+  .sr-tag{ font-size:10.5px; font-weight:700; color:var(--verde-700); text-transform:uppercase; }
+  .sr-title{ font-size:13.5px; font-weight:600; }
+  .sr-meta{ font-size:11px; color:var(--gris-600); }
+  .search-empty{ padding:14px; font-size:13px; color:var(--gris-600); }
+
+  .tools-panel{ display:none; max-width:960px; margin:0 auto; padding: 12px 16px 18px; }
+  .tools-panel.open{ display:block; }
+  .tools-card{ background:var(--white); border:1px solid var(--gris-300); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+  .tools-card h3{ margin:0 0 10px; font-size:14.5px; color:var(--verde-900); }
+  .tools-row{ display:flex; flex-wrap:wrap; gap:9px; margin-bottom:12px; }
+  .tools-btn{ font-size:13px; font-weight:700; border:1.5px solid var(--gris-300); background:var(--beige-50); color:var(--verde-700); padding:8px 14px; border-radius:8px; cursor:pointer; }
+  .tools-btn:hover{ border-color:var(--verde-500); }
+  .switch-row{ display:flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; margin-bottom:14px; }
+  .weekly-summary{ display:none; margin-top:8px; border-top:1px dashed var(--gris-300); padding-top:12px; }
+  .weekly-summary.open{ display:block; }
+  .weekly-counts{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .weekly-item{ font-size:12.5px; padding:5px 0; border-bottom:1px solid var(--beige-100); }
+
+  main{ max-width: 780px; margin:0 auto; padding: 18px 16px 70px; }
+  .section-panel{ display:none; }
+  .section-panel.active{ display:block; }
+  .panel-head{ margin-bottom:16px; }
+  .panel-head h2{ font-size:20px; margin:0 0 3px; color:var(--verde-900); }
+  .panel-head p{ font-size:13px; color:var(--gris-600); margin:0; }
+
+  .subtabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  .subtab-btn{ font-weight:700; font-size:13.5px; padding: 9px 18px; border-radius:10px; border:1.5px solid var(--gris-300); background:var(--white); color:var(--gris-600); cursor:pointer; }
+  .subtab-btn.active{ background:var(--verde-700); border-color:var(--verde-700); color:#fff; }
+
+  .stat-bar{ font-size:13px; font-weight:700; color:var(--verde-700); background:var(--verde-100); border-radius:8px; padding:9px 13px; margin-bottom:14px; }
+  body.dark .stat-bar{ color:#fff; background:var(--verde-700); }
+
+  .plano-card{ background:var(--white); border:1px solid var(--gris-300); border-radius:var(--radius); padding:16px 18px; margin-bottom:16px; box-shadow:var(--shadow); }
+  .plano-card h4{ margin:0 0 10px; font-size:14px; color:var(--verde-900); }
+  .plano-meta{ font-size:11.5px; color:var(--gris-600); margin-top:8px; }
+  .plano-empty{ font-size:13px; color:var(--gris-600); }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .chip{ font-size:12px; font-weight:600; padding: 6px 13px; border-radius:999px; border:1.5px solid var(--gris-300); background:var(--white); color:var(--gris-600); cursor:pointer; }
+  .chip.active{ background:var(--verde-500); border-color:var(--verde-500); color:#fff; }
+
+  .btn-primary{ display:inline-flex; align-items:center; gap:7px; background: var(--verde-700); color:#fff; border:none; font-weight:700; font-size:14px; padding: 10px 18px; border-radius: 10px; cursor:pointer; margin-bottom: 18px; }
+  .btn-primary:hover{ background: var(--verde-800); }
+
+  form.card-form{ display:none; background:var(--white); border:1px solid var(--gris-300); border-radius: var(--radius); padding: 18px; margin-bottom: 22px; box-shadow: var(--shadow); }
+  form.card-form.open{ display:block; }
+  .field{ margin-bottom:13px; }
+  .field label{ display:block; font-size:12px; font-weight:700; color:var(--gris-600); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:5px; }
+  .field input, .field select, .field textarea{ width:100%; font-size:14.5px; padding:10px 11px; border:1.5px solid var(--gris-300); border-radius:8px; background:var(--beige-50); color:var(--gris-900); }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:2px solid var(--verde-500); outline-offset:1px; }
+  .field textarea{ min-height:64px; resize:vertical; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:520px){ .row2{ grid-template-columns:1fr; } }
+
+  .photo-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .photo-btn{ display:inline-flex; align-items:center; gap:6px; background: var(--beige-100); border:1.5px dashed var(--gris-300); color: var(--verde-700); font-weight:700; font-size:13px; padding: 9px 14px; border-radius:8px; cursor:pointer; }
+  .photo-btn:hover{ border-color:var(--verde-500); }
+  .photo-filename{ font-size:12px; color:var(--gris-600); }
+  .photo-preview{ display:none; margin-top:10px; max-width:160px; max-height:160px; border-radius:8px; border:1px solid var(--gris-300); object-fit:cover; }
+
+  .mic-btn{ display:inline-flex; align-items:center; gap:6px; margin-top:8px; background:var(--beige-100); border:1.5px solid var(--gris-300); color:var(--verde-700); font-weight:700; font-size:12.5px; padding:7px 12px; border-radius:8px; cursor:pointer; }
+  .mic-btn:hover{ border-color:var(--verde-500); }
+  .mic-btn.mic-active{ background:var(--danger); color:#fff; border-color:var(--danger); animation:pulse 1.2s infinite; }
+  @keyframes pulse{ 0%{opacity:1;} 50%{opacity:0.65;} 100%{opacity:1;} }
+
+  .form-actions{ display:flex; gap:10px; margin-top:6px; }
+  .btn-save{ font-weight:700; font-size:14px; border:none; cursor:pointer; padding:10px 20px; border-radius:8px; background:var(--verde-700); color:#fff; }
+  .btn-save:hover{ background:var(--verde-800); }
+  .btn-cancel{ font-weight:600; font-size:14px; border:1.5px solid var(--gris-300); background:transparent; color:var(--gris-600); cursor:pointer; padding:10px 16px; border-radius:8px; }
+
+  .record-list{ display:flex; flex-direction:column; gap:12px; }
+  .record-card{ background:var(--white); border:1px solid var(--gris-300); border-left:4px solid var(--verde-700); border-radius:10px; padding:15px 16px; box-shadow:var(--shadow); }
+  .record-top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+  .record-title{ font-family:'Manrope',sans-serif; font-weight:700; font-size:15.5px; margin:0 0 4px; color:var(--verde-900); }
+  .record-meta{ display:flex; flex-wrap:wrap; gap:9px; font-size:11.5px; color:var(--gris-600); margin-top:5px; align-items:center; }
+  .record-desc{ font-size:13.5px; color:var(--gris-900); margin:8px 0 0; white-space:pre-wrap; }
+  .record-photo{ margin-top:10px; max-width:100%; max-height:220px; border-radius:8px; border:1px solid var(--gris-300); display:block; }
+  .record-actions{ display:flex; gap:5px; flex-shrink:0; align-items:center; }
+  .icon-btn{ border:none; background:transparent; cursor:pointer; font-size:14px; padding:4px 6px; border-radius:6px; color:var(--gris-600); }
+  .icon-btn:hover{ background:var(--beige-100); }
+
+  .badge-flag{ font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px; color:#fff; }
+  .badge-flag.danger{ background:var(--danger); }
+  .badge-flag.warn{ background:var(--warning); }
+  .badge-flag.good{ background:var(--good); }
+  .badge-flag.bad{ background:var(--danger); }
+  .badge-flag.info{ background:var(--info); }
+
+  .year-summary{ margin-top:16px; background:var(--beige-100); border-radius:10px; padding:12px 14px; }
+  .year-summary h4{ margin:0 0 8px; font-size:13px; color:var(--verde-900); }
+  .year-row{ font-size:13px; margin-bottom:5px; }
+  .year-detail{ color:var(--gris-600); font-size:11.5px; }
+
+  .empty-state{ text-align:center; padding:40px 10px; color:var(--gris-600); }
+  .empty-state .big{ font-size:32px; display:block; margin-bottom:8px; }
+  .empty-state p{ font-size:13.5px; margin:4px 0 0; }
+
+  .vehicle-card{ background:var(--white); border:1px solid var(--gris-300); border-left:4px solid var(--verde-700); border-radius:10px; padding:16px 18px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .vehicle-top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; cursor:pointer; }
+  .vehicle-name{ font-family:'Manrope',sans-serif; font-weight:700; font-size:16.5px; margin:0 0 3px; color:var(--verde-900); }
+  .vehicle-meta{ font-size:11.5px; color:var(--gris-600); }
+  .vehicle-body{ display:none; margin-top:14px; border-top:1px dashed var(--gris-300); padding-top:14px; }
+  .vehicle-body.open{ display:block; }
+  .service-list{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .service-item{ background:var(--beige-50); border-radius:8px; padding:10px 12px; font-size:13.5px; display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+  .service-item.overdue{ border-left:3px solid var(--danger); }
+  .service-info b{ display:block; font-size:14px; margin-bottom:2px; }
+  .service-info .service-meta{ font-size:10.5px; color:var(--gris-600); }
+  .service-info .service-next{ font-size:12px; color:var(--verde-700); margin-top:3px; }
+  .service-info .service-next.overdue{ color:var(--danger); font-weight:700; }
+
+  footer{ text-align:center; font-size:11.5px; color:var(--gris-600); padding: 20px 10px 0; }
+  .save-note{ font-size:11.5px; color:var(--gris-600); text-align:center; margin-top:8px; }
+
+  @media print{
+    #profile-gate, header.topbar, .search-bar, .tools-panel, .sync-banner, .btn-primary, form.card-form, .record-actions, .icon-btn, .subtabs, .chips { display:none !important; }
+    .section-panel{ display:block !important; }
+    body{ background:#fff; }
+  }
+  @media (max-width:480px){ main{ padding: 16px 12px 60px; } form.card-form{ padding:15px; } }
+</style>
+</head>
+<body>
+
+<!-- ============ PROFILE GATE ============ -->
+<div id="profile-gate">
+  <div class="gate-card">
+    <svg class="logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 14px;">
+      <rect x="1" y="1" width="46" height="46" rx="12" fill="#23422C"/>
+      <path d="M24 9c-7.5 4-12 10.5-12 17.5C12 32 16 36 21 36h2v-8.5c0-6.5 3-12 8.5-15.5C29 10 26.7 9 24 9z" fill="#F7F4EC"/>
+      <path d="M24 36v-8.5c5.5 0 10-3.5 10-9 0 9-4.5 16-10 17.5z" fill="#3B6B45"/>
+    </svg>
+    <p class="gate-title">¿Quién está ingresando?</p>
+    <p class="gate-sub">Elegí tu nombre para empezar a cargar notas.</p>
+    <div class="user-grid" id="user-grid"></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app-content">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <svg class="logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="46" height="46" rx="12" fill="#1D3423"/>
+          <path d="M24 9c-7.5 4-12 10.5-12 17.5C12 32 16 36 21 36h2v-8.5c0-6.5 3-12 8.5-15.5C29 10 26.7 9 24 9z" fill="#F7F4EC"/>
+          <path d="M24 36v-8.5c5.5 0 10-3.5 10-9 0 9-4.5 16-10 17.5z" fill="#3B6B45"/>
+        </svg>
+        <div class="brand-text"><span class="name">Cuaderno de Campo</span><span class="tag">Gestión familiar</span></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-round" title="Herramientas" onclick="toggleTools()">⚙️</button>
+        <div class="user-chip">
+          <span class="dot" id="user-dot">P</span>
+          <span id="active-user-name">—</span>
+          <button onclick="changeUser()">Cambiar</button>
+        </div>
+      </div>
+    </div>
+    <nav class="tabs">
+      <div class="tabs-inner">
+        <button class="tab-btn active" data-section="animales" onclick="switchSection('animales')">🐄 Animales</button>
+        <button class="tab-btn" data-section="frutales" onclick="switchSection('frutales')">🌳 Frutales</button>
+        <button class="tab-btn" data-section="vehiculos" onclick="switchSection('vehiculos')">🚜 Vehículos</button>
+      </div>
+    </nav>
+  </header>
+
+  <div class="sync-banner" id="sync-banner"></div>
+
+  <div class="search-bar">
+    <input type="text" id="global-search" placeholder="🔍 Buscar en todo el cuaderno (caravana, cuadro, producto, autor...)" oninput="runGlobalSearch(this.value)">
+    <div class="search-results" id="search-results"></div>
+  </div>
+
+  <div class="tools-panel" id="tools-panel">
+    <div class="tools-card">
+      <h3>Herramientas</h3>
+      <div class="switch-row">
+        <input type="checkbox" id="dark-toggle" onchange="toggleDarkMode()"> <label for="dark-toggle">Modo oscuro</label>
+      </div>
+      <div class="tools-row">
+        <button class="tools-btn" onclick="exportCSV()">⬇️ Exportar a Excel (CSV)</button>
+        <button class="tools-btn" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+        <button class="tools-btn" onclick="downloadBackup()">💾 Descargar copia de seguridad</button>
+        <label class="tools-btn" for="restore-input" style="cursor:pointer;">📤 Restaurar copia</label>
+        <input type="file" id="restore-input" accept="application/json" style="display:none" onchange="restoreBackup(event)">
+        <button class="tools-btn" onclick="toggleWeeklySummary()">📅 Resumen semanal</button>
+      </div>
+      <div class="weekly-summary" id="weekly-summary"><div id="weekly-summary-content"></div></div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ===== ANIMALES ===== -->
+    <section class="section-panel active" id="panel-animales">
+      <div class="panel-head"><h2>Animales</h2><p>Registros de hacienda por establecimiento.</p></div>
+      <div class="subtabs" id="subtabs-animales"></div>
+
+      <div class="plano-card">
+        <h4>🗺️ Plano y cuadros del campo</h4>
+        <div id="plano-view"></div>
+        <button class="tools-btn" style="margin-top:10px;" onclick="togglePlanoEdit()">✏️ Editar plano y cuadros</button>
+        <form class="card-form" id="form-plano" onsubmit="return savePlano(event)">
+          <div id="fields-plano"></div>
+          <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="togglePlanoEdit()">Cancelar</button></div>
+        </form>
+      </div>
+
+      <div class="stat-bar" id="stat-animales"></div>
+      <div class="chips" id="chips-animales"></div>
+      <button class="btn-primary" onclick="toggleForm('animales-record')">+ Nuevo registro</button>
+      <form class="card-form" id="form-animales-record" onsubmit="return saveDomainRecord(event,'animales')">
+        <div id="fields-animales"></div>
+        <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="toggleForm('animales-record')">Cancelar</button></div>
+      </form>
+      <div class="record-list" id="list-animales"></div>
+    </section>
+
+    <!-- ===== FRUTALES ===== -->
+    <section class="section-panel" id="panel-frutales">
+      <div class="panel-head"><h2>Frutales</h2><p>Riego, poda, cosecha, fertilización y plagas por variedad.</p></div>
+      <div class="subtabs" id="subtabs-frutales"></div>
+      <div class="chips" id="chips-frutales"></div>
+      <button class="btn-primary" onclick="toggleForm('frutales-record')">+ Nuevo registro</button>
+      <form class="card-form" id="form-frutales-record" onsubmit="return saveDomainRecord(event,'frutales')">
+        <div id="fields-frutales"></div>
+        <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="toggleForm('frutales-record')">Cancelar</button></div>
+      </form>
+      <div class="record-list" id="list-frutales"></div>
+    </section>
+
+    <!-- ===== VEHICULOS ===== -->
+    <section class="section-panel" id="panel-vehiculos">
+      <div class="panel-head"><h2>Vehículos</h2><p>Historial de service, alertas por km y consumo de combustible.</p></div>
+      <button class="btn-primary" onclick="toggleForm('vehiculo-nuevo')">+ Nuevo vehículo</button>
+      <form class="card-form" id="form-vehiculo-nuevo" onsubmit="return saveVehiculo(event)">
+        <div class="row2">
+          <div class="field"><label>Nombre / apodo</label><input type="text" id="nombre-vehiculo" required placeholder="Ej: Camioneta roja"></div>
+          <div class="field"><label>Tipo</label>
+            <select id="tipo-vehiculo">
+              <option value="Camioneta">Camioneta</option><option value="Tractor">Tractor</option>
+              <option value="Auto">Auto</option><option value="Moto">Moto</option>
+              <option value="Maquinaria">Maquinaria</option><option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Patente / identificación (opcional)</label><input type="text" id="patente-vehiculo" placeholder="Ej: AB123CD"></div>
+        <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="toggleForm('vehiculo-nuevo')">Cancelar</button></div>
+      </form>
+      <div id="list-vehiculos"></div>
+    </section>
+
+  </main>
+
+  <p class="save-note">Los datos se guardan en la nube (Firebase) y se comparten entre todos los que abren este cuaderno.</p>
+  <footer>Cuaderno de Campo · uso familiar</footer>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ================================================================
+   CONFIGURACIÓN DE FIREBASE — PASO OBLIGATORIO
+   Reemplazá estos valores por los de TU proyecto de Firebase.
+   Los encontrás en: Configuración del proyecto > Tus apps > (ícono web) > Config
+   ================================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "PEGA_AQUI_TU_API_KEY",
+  authDomain: "PEGA_AQUI_TU_AUTH_DOMAIN",
+  projectId: "PEGA_AQUI_TU_PROJECT_ID",
+  storageBucket: "PEGA_AQUI_TU_STORAGE_BUCKET",
+  messagingSenderId: "PEGA_AQUI_TU_MESSAGING_SENDER_ID",
+  appId: "PEGA_AQUI_TU_APP_ID"
+};
+
+const USERS = ["Rubén","Rolo","Nora","Guille","Pedro"];
+const USER_KEY = "cuadernoCampoUser";
+const DARK_KEY = "cuadernoCampoDark";
+
+let db = null;
+let firebaseReady = false;
+let syncedRegistros = false;
+let syncedVehiculos = false;
+let syncedPlanos = false;
+
+let data = {};
+let activeUser = null;
+let pendingPhotos = {};
+let openVehicle = null;
+let vehicleView = {};
+
+/* ---------- domain configuration ---------- */
+const DOMAINS = {
+  animales: {
+    locations: [ {key:'ensenada', label:'Ensenada', icon:'📍'}, {key:'otraChacra', label:'Otra Chacra', icon:'📍'} ],
+    categories: [
+      { key:'cantidad', label:'Cantidad de animales', icon:'🐄', isCountCategory:true,
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cantidad',label:'Cantidad de animales',type:'number',required:true}, {id:'categoria',label:'Categoría (ej: vacas, terneros)',type:'text'} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.cantidad} animales${r.categoria?' · '+r.categoria:''}` },
+      { key:'pesos', label:'Pesos promedio', icon:'⚖️', trend:{field:'pesoPromedio', unit:'kg'},
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cabezas',label:'Cabezas pesadas',type:'number',required:true}, {id:'pesoPromedio',label:'Peso promedio (kg)',type:'number',required:true} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.pesoPromedio} kg prom. · ${r.cabezas} cabezas` },
+      { key:'caravanas', label:'Caravanas', icon:'🏷️',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'numero',label:'Número de caravana',type:'text',required:true}, {id:'categoriaAnimal',label:'Categoría del animal',type:'text'} ],
+        detailField:true, photoField:true,
+        summary: r => `Caravana ${r.numero}${r.categoriaAnimal?' · '+r.categoriaAnimal:''}` },
+      { key:'partos', label:'Partos', icon:'🐮',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'caravanaMadre',label:'Caravana madre',type:'text',required:true}, {id:'caravanaCria',label:'Caravana cría (opcional)',type:'text'}, {id:'sexoCria',label:'Sexo de la cría',type:'select',options:['Hembra','Macho','Sin determinar']} ],
+        detailField:true, photoField:true,
+        summary: r => `Madre ${r.caravanaMadre}${r.sexoCria?' · '+r.sexoCria:''}` },
+      { key:'tratamientos', label:'Tratamientos', icon:'💉', overdueField:'proximoTratamiento', overdueLabel:'Tratamiento vencido',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cabezas',label:'Cantidad de cabezas',type:'number',required:true}, {id:'producto',label:'Producto aplicado',type:'text',required:true}, {id:'proximoTratamiento',label:'Próximo tratamiento (opcional)',type:'date'} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.producto} · ${r.cabezas} cabezas` },
+      { key:'servicios', label:'Servicios y preñez', icon:'🔔', computeGestation:true, overdueField:'fechaProbableParto', overdueLabel:'Parto atrasado', upcomingDays:30,
+        fields:[ {id:'fechaServicio',label:'Fecha de servicio',type:'date',required:true}, {id:'caravana',label:'Caravana de la madre',type:'text',required:true}, {id:'diasGestacion',label:'Días de gestación (aprox.)',type:'number',default:285} ],
+        detailField:true, photoField:true,
+        summary: r => `Caravana ${r.caravana} · Parto probable ${formatFecha(r.fechaProbableParto)}` }
+    ]
+  },
+  frutales: {
+    locations: [ {key:'avellanos', label:'Avellanos', icon:'🌰'}, {key:'nogales', label:'Nogales', icon:'🌳'} ],
+    categories: [
+      { key:'riego', label:'Riego', icon:'💧', overdueField:'proximoRiego', overdueLabel:'Riego atrasado',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cuadro',label:'Cuadro / lote',type:'text'}, {id:'proximoRiego',label:'Próximo riego (opcional)',type:'date'} ],
+        detailField:true, photoField:true,
+        summary: r => r.cuadro ? `Riego · Cuadro ${r.cuadro}` : 'Riego' },
+      { key:'poda', label:'Poda', icon:'✂️',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cuadro',label:'Cuadro / lote',type:'text'} ],
+        detailField:true, photoField:true,
+        summary: r => r.cuadro ? `Poda · Cuadro ${r.cuadro}` : 'Poda' },
+      { key:'cosecha', label:'Cosecha', icon:'🧺', yearSummary:true,
+        fields:[ {id:'anio',label:'Año',type:'number',required:true}, {id:'cuadro',label:'Cuadro / lote',type:'text',required:true}, {id:'kilos',label:'Kilos cosechados',type:'number',required:true} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.anio} · Cuadro ${r.cuadro} · ${r.kilos} kg` },
+      { key:'fertilizacion', label:'Fertilización', icon:'🧪', overdueField:'proximoFertilizacion', overdueLabel:'Fertilización atrasada', costField:'costo',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cuadro',label:'Cuadro / lote',type:'text'}, {id:'producto',label:'Producto aplicado',type:'text',required:true}, {id:'dosis',label:'Dosis / cantidad',type:'text'}, {id:'costo',label:'Costo aproximado ($, opcional)',type:'number'}, {id:'proximoFertilizacion',label:'Próxima fertilización (opcional)',type:'date'} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.producto}${r.cuadro?' · Cuadro '+r.cuadro:''}` },
+      { key:'plagas', label:'Plagas / enfermedades', icon:'🐛', overdueField:'proximoControl', overdueLabel:'Control atrasado',
+        fields:[ {id:'fecha',label:'Fecha',type:'date',required:true}, {id:'cuadro',label:'Cuadro / lote',type:'text'}, {id:'plagaDetectada',label:'Plaga / enfermedad detectada',type:'text',required:true}, {id:'productoAplicado',label:'Producto aplicado',type:'text'}, {id:'proximoControl',label:'Próximo control (opcional)',type:'date'} ],
+        detailField:true, photoField:true,
+        summary: r => `${r.plagaDetectada}${r.cuadro?' · Cuadro '+r.cuadro:''}` }
+    ]
+  }
+};
+
+let domainState = { animales: {location:'ensenada', category:'cantidad'}, frutales: {location:'avellanos', category:'riego'} };
+const SERVICE_TYPES = ["Aceite y filtros","Neumáticos","Frenos","Revisión general","Batería","Otro"];
+
+function uid(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function isOverdue(iso){ return iso && iso < todayISO(); }
+function formatFecha(iso){ if(!iso) return ''; const [y,m,d]=iso.split('-'); return `${d}/${m}/${y}`; }
+function escapeHtml(str){ const d=document.createElement('div'); d.textContent = str==null?'':str; return d.innerHTML; }
+function addDaysISO(iso, days){ const d = new Date(iso+'T00:00:00'); d.setDate(d.getDate()+parseInt(days||0,10)); return d.toISOString().slice(0,10); }
+
+function emptyDomainData(domain){
+  const out = {};
+  DOMAINS[domain].locations.forEach(loc => { out[loc.key] = {}; DOMAINS[domain].categories.forEach(cat => { out[loc.key][cat.key] = []; }); });
+  return out;
+}
+function emptyData(){ return { animales: emptyDomainData('animales'), frutales: emptyDomainData('frutales'), vehiculos: [], planos: {} }; }
+
+/* ---------- Firebase connection + realtime sync ---------- */
+function showSyncBanner(msg, type){
+  const b = document.getElementById('sync-banner');
+  b.textContent = msg; b.className = 'sync-banner ' + (type||'info'); b.style.display = 'block';
+}
+function hideSyncBanner(){ document.getElementById('sync-banner').style.display = 'none'; }
+function checkAllSynced(){ if(syncedRegistros && syncedVehiculos && syncedPlanos) hideSyncBanner(); }
+
+function initFirebase(){
+  if(FIREBASE_CONFIG.apiKey.startsWith('PEGA_AQUI')){
+    showSyncBanner('⚠️ Falta configurar la conexión con Firebase en el código (buscá FIREBASE_CONFIG). Los datos no se van a compartir hasta que esto esté hecho.', 'warn');
+    return;
+  }
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    firebaseReady = true;
+    showSyncBanner('🔄 Sincronizando con la nube...', 'info');
+    attachRegistrosListener();
+    attachVehiculosListener();
+    attachPlanosListener();
+  }catch(e){
+    console.error(e);
+    showSyncBanner('⚠️ Hubo un error al conectar con Firebase. Revisá la configuración (FIREBASE_CONFIG) en el código.', 'warn');
+  }
+}
+function attachRegistrosListener(){
+  db.collection('registros').onSnapshot(snapshot => {
+    const fresh = { animales: emptyDomainData('animales'), frutales: emptyDomainData('frutales') };
+    snapshot.forEach(docSnap => {
+      const r = docSnap.data();
+      const domain = r.domain, location = r.location, category = r.category;
+      if(fresh[domain] && fresh[domain][location] && fresh[domain][location][category]){
+        const record = { ...r, id: docSnap.id };
+        delete record.domain; delete record.location; delete record.category;
+        fresh[domain][location][category].push(record);
+      }
+    });
+    data.animales = fresh.animales;
+    data.frutales = fresh.frutales;
+    ['animales','frutales'].forEach(d => renderDomainList(d));
+    renderAnimalesStat();
+    syncedRegistros = true; checkAllSynced();
+  }, err => { console.error(err); showSyncBanner('⚠️ No se pudo sincronizar con la base de datos. Revisá tu conexión a internet.', 'warn'); });
+}
+function attachVehiculosListener(){
+  db.collection('vehiculos').onSnapshot(snapshot => {
+    data.vehiculos = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderVehiculos();
+    syncedVehiculos = true; checkAllSynced();
+  }, err => { console.error(err); showSyncBanner('⚠️ No se pudo sincronizar con la base de datos. Revisá tu conexión a internet.', 'warn'); });
+}
+function attachPlanosListener(){
+  db.collection('planos').onSnapshot(snapshot => {
+    const fresh = {};
+    snapshot.forEach(d => { fresh[d.id] = d.data(); });
+    data.planos = fresh;
+    renderPlano();
+    syncedPlanos = true; checkAllSynced();
+  }, err => { console.error(err); showSyncBanner('⚠️ No se pudo sincronizar el plano. Revisá tu conexión a internet.', 'warn'); });
+}
+function requireFirebase(){
+  if(!firebaseReady){ alert('Todavía no está configurada la conexión con la base de datos compartida (Firebase). Revisá FIREBASE_CONFIG en el código.'); return false; }
+  return true;
+}
+
+/* ---------- profile gate ---------- */
+function buildUserGrid(){
+  document.getElementById('user-grid').innerHTML = USERS.map(name => `
+    <button class="user-btn" onclick="chooseUser('${name}')"><span class="user-avatar">${name.charAt(0)}</span><span class="name">${name}</span></button>
+  `).join('');
+}
+function chooseUser(name){ activeUser = name; try{ localStorage.setItem(USER_KEY, name); }catch(e){} enterApp(); }
+function changeUser(){ document.getElementById('profile-gate').style.display = 'flex'; document.getElementById('app-content').style.display = 'none'; }
+function enterApp(){
+  document.getElementById('profile-gate').style.display = 'none';
+  document.getElementById('app-content').style.display = 'block';
+  document.getElementById('active-user-name').textContent = activeUser;
+  document.getElementById('user-dot').textContent = activeUser.charAt(0);
+  renderAll();
+}
+
+/* ---------- top-level tabs / forms ---------- */
+function switchSection(sec){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.section === sec));
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + sec).classList.add('active');
+}
+function toggleForm(id){ document.getElementById('form-' + id).classList.toggle('open'); }
+
+/* ---------- photo handling (con compresión) ---------- */
+function resizeImage(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if(width > height && width > maxDim){ height = Math.round(height * maxDim / width); width = maxDim; }
+        else if(height >= width && height > maxDim){ width = Math.round(width * maxDim / height); height = maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+async function handlePhoto(evt, key){
+  const file = evt.target.files[0]; if(!file) return;
+  const fn = document.getElementById('foto-filename-' + key);
+  if(fn) fn.textContent = 'Procesando...';
+  try{
+    const dataUrl = await resizeImage(file, 900, 0.7);
+    pendingPhotos[key] = dataUrl;
+    const preview = document.getElementById('foto-preview-' + key);
+    if(preview){ preview.src = dataUrl; preview.style.display = 'block'; }
+    if(fn) fn.textContent = file.name + ' (comprimida)';
+  }catch(e){ if(fn) fn.textContent = ''; alert('No se pudo procesar la foto.'); }
+}
+function clearPhotoInput(key){
+  delete pendingPhotos[key];
+  const preview = document.getElementById('foto-preview-' + key);
+  if(preview){ preview.style.display = 'none'; preview.src = ''; }
+  const fn = document.getElementById('foto-filename-' + key);
+  if(fn) fn.textContent = '';
+  const input = document.getElementById('foto-' + key);
+  if(input) input.value = '';
+}
+function photoFieldHtml(key){
+  return `<div class="field"><label>Foto (opcional)</label>
+    <div class="photo-row">
+      <label class="photo-btn" for="foto-${key}">📷 Elegir o tomar foto</label>
+      <input type="file" id="foto-${key}" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event,'${key}')">
+      <span class="photo-filename" id="foto-filename-${key}"></span>
+    </div>
+    <img class="photo-preview" id="foto-preview-${key}"></div>`;
+}
+
+/* ---------- dictado por voz ---------- */
+function fieldWithMicHtml(id, label, placeholder, value){
+  return `<div class="field"><label>${label}</label>
+    <textarea id="${id}" placeholder="${placeholder||''}">${value||''}</textarea>
+    <button type="button" class="mic-btn" id="mic-${id}" onclick="startDictation('${id}', this)">🎤 Dictar por voz</button>
+  </div>`;
+}
+function startDictation(textareaId, btnEl){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Tu navegador no permite dictado por voz. Probá con Chrome (en el celular Android o en la computadora); en Safari de iPhone no funciona.'); return; }
+  if(btnEl.dataset.recording === '1'){ if(btnEl._recognition) btnEl._recognition.stop(); return; }
+  const recognition = new SR();
+  recognition.lang = 'es-AR';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  btnEl._recognition = recognition;
+  btnEl.dataset.recording = '1';
+  btnEl.classList.add('mic-active');
+  btnEl.textContent = '🎙️ Escuchando... (tocá para detener)';
+  recognition.onresult = (event) => {
+    let finalText = '';
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      if(event.results[i].isFinal) finalText += event.results[i][0].transcript;
+    }
+    if(finalText){
+      const textarea = document.getElementById(textareaId);
+      if(textarea) textarea.value = (textarea.value ? textarea.value.trim() + ' ' : '') + finalText.trim();
+    }
+  };
+  recognition.onerror = (e) => { console.error(e); if(e.error !== 'no-speech') alert('No se pudo escuchar. Revisá que le hayas dado permiso de micrófono al navegador.'); };
+  recognition.onend = () => { btnEl.classList.remove('mic-active'); btnEl.textContent = '🎤 Dictar por voz'; btnEl.dataset.recording = '0'; };
+  try{ recognition.start(); }catch(e){ console.error(e); }
+}
+
+/* ---------- overdue / upcoming badges ---------- */
+function overdueBadge(cat, record){
+  if(!cat.overdueField) return '';
+  const val = record[cat.overdueField];
+  if(!val) return '';
+  const today = todayISO();
+  const limit = addDaysISO(today, cat.upcomingDays || 7);
+  if(val < today) return `<span class="badge-flag danger">${cat.overdueLabel || 'Vencido'}</span>`;
+  if(val <= limit) return `<span class="badge-flag warn">Se acerca: ${formatFecha(val)}</span>`;
+  return '';
+}
+
+/* ---------- generic Animales / Frutales domain logic ---------- */
+function currentCategoryConfig(domain){ return DOMAINS[domain].categories.find(c => c.key === domainState[domain].category); }
+function switchLocation(domain, locKey){ domainState[domain].location = locKey; renderDomainNav(domain); renderDomainForm(domain); renderDomainList(domain); if(domain==='animales'){ renderAnimalesStat(); renderPlano(); } }
+function switchCategory(domain, catKey){ domainState[domain].category = catKey; renderDomainNav(domain); renderDomainForm(domain); renderDomainList(domain); }
+function renderDomainNav(domain){
+  const state = domainState[domain];
+  document.getElementById('subtabs-' + domain).innerHTML = DOMAINS[domain].locations.map(l => `<button class="subtab-btn ${state.location===l.key?'active':''}" onclick="switchLocation('${domain}','${l.key}')">${l.icon||''} ${l.label}</button>`).join('');
+  document.getElementById('chips-' + domain).innerHTML = DOMAINS[domain].categories.map(c => `<button class="chip ${state.category===c.key?'active':''}" onclick="switchCategory('${domain}','${c.key}')">${c.icon||''} ${c.label}</button>`).join('');
+}
+function renderAnimalesStat(){
+  const loc = domainState.animales.location;
+  const items = (data.animales && data.animales[loc] && data.animales[loc].cantidad) || [];
+  const holder = document.getElementById('stat-animales');
+  if(!holder) return;
+  if(items.length === 0){ holder.textContent = 'Todavía no hay un registro de cantidad de animales cargado acá.'; return; }
+  const latest = [...items].sort((a,b) => b.creado - a.creado)[0];
+  const locLabel = DOMAINS.animales.locations.find(l => l.key === loc).label;
+  holder.textContent = `Total de cabezas en ${locLabel}: ${latest.cantidad} (según registro del ${formatFecha(latest.fecha)})`;
+}
+function togglePlanoEdit(){ document.getElementById('form-plano').classList.toggle('open'); }
+function renderPlano(){
+  const loc = domainState.animales.location;
+  const key = 'plano-' + loc;
+  const planoData = (data.planos && data.planos[loc]) || null;
+  const viewHolder = document.getElementById('plano-view');
+  if(!viewHolder) return;
+
+  if(planoData && (planoData.foto || planoData.descripcion)){
+    const fechaTxt = planoData.actualizado ? new Date(planoData.actualizado).toLocaleDateString('es-AR') : '';
+    viewHolder.innerHTML =
+      (planoData.foto ? `<img class="record-photo" src="${planoData.foto}" alt="Plano del campo" style="max-height:320px;">` : '') +
+      (planoData.descripcion ? `<p class="record-desc">${escapeHtml(planoData.descripcion)}</p>` : '') +
+      `<div class="plano-meta">Actualizado por ${escapeHtml(planoData.autor||'')}${fechaTxt ? ' · '+fechaTxt : ''}</div>`;
+  }else{
+    viewHolder.innerHTML = `<p class="plano-empty">Todavía no cargaste el plano ni los cuadros de este campo.</p>`;
+  }
+
+  document.getElementById('fields-plano').innerHTML = photoFieldHtml(key) +
+    fieldWithMicHtml('descripcion-'+key, 'Cuadros: número, cantidad de animales y pasturas', 'Ej: Cuadro 1: 40 vacas, pastura de alfalfa. Cuadro 2: 15 terneros, campo natural...', planoData ? escapeHtml(planoData.descripcion||'') : '');
+  clearPhotoInput(key);
+  if(planoData && planoData.foto){
+    pendingPhotos[key] = planoData.foto;
+    const preview = document.getElementById('foto-preview-'+key);
+    if(preview){ preview.src = planoData.foto; preview.style.display = 'block'; }
+    const fn = document.getElementById('foto-filename-'+key);
+    if(fn) fn.textContent = '(foto actual, elegí otra para reemplazarla)';
+  }
+}
+function savePlano(evt){
+  evt.preventDefault();
+  if(!requireFirebase()) return false;
+  const loc = domainState.animales.location;
+  const key = 'plano-' + loc;
+  const descripcion = document.getElementById('descripcion-'+key).value.trim();
+  const foto = pendingPhotos[key] || null;
+  db.collection('planos').doc(loc).set({ descripcion, foto, autor: activeUser, actualizado: Date.now() })
+    .catch(err => { console.error(err); alert('No se pudo guardar en la nube. Revisá tu conexión a internet.'); });
+  togglePlanoEdit();
+  return false;
+}
+function fieldHtml(f, domain){
+  const id = `f-${domain}-${f.id}`;
+  const val = f.default !== undefined ? ` value="${f.default}"` : '';
+  if(f.type === 'select') return `<div class="field"><label>${f.label}</label><select id="${id}">${f.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select></div>`;
+  return `<div class="field"><label>${f.label}</label><input type="${f.type}" id="${id}" ${f.required?'required':''}${val}></div>`;
+}
+function renderDomainForm(domain){
+  const cat = currentCategoryConfig(domain);
+  const holder = document.getElementById('fields-' + domain);
+  holder.innerHTML = cat.fields.map(f => fieldHtml(f, domain)).join('') +
+    (cat.detailField ? fieldWithMicHtml(`f-${domain}-detalle`, 'Detalle', 'Notas adicionales...') : '') +
+    (cat.photoField ? photoFieldHtml(domain) : '');
+  cat.fields.forEach(f => { if(f.type === 'date'){ const el = document.getElementById(`f-${domain}-${f.id}`); if(el) el.value = todayISO(); } });
+  clearPhotoInput(domain);
+}
+function computeTrend(items, field){
+  const asc = [...items].sort((a,b) => (a.fecha||'').localeCompare(b.fecha||'') || a.creado - b.creado);
+  const map = {};
+  for(let i=1;i<asc.length;i++){
+    const prev = parseFloat(asc[i-1][field]), cur = parseFloat(asc[i][field]);
+    if(!isNaN(prev) && !isNaN(cur)) map[asc[i].id] = cur - prev;
+  }
+  return map;
+}
+function renderCosechaSummary(items){
+  const porAnio = {};
+  items.forEach(r => {
+    const anio = r.anio || '—';
+    if(!porAnio[anio]) porAnio[anio] = { total:0, cuadros:{} };
+    const kilos = parseFloat(r.kilos) || 0;
+    porAnio[anio].total += kilos;
+    porAnio[anio].cuadros[r.cuadro] = (porAnio[anio].cuadros[r.cuadro] || 0) + kilos;
+  });
+  const anios = Object.keys(porAnio).sort((a,b) => b - a);
+  if(anios.length === 0) return '';
+  return `<div class="year-summary"><h4>Resumen de cosecha por año</h4>
+    ${anios.map(a => `<div class="year-row"><b>${a}</b>: ${porAnio[a].total.toLocaleString('es-AR')} kg totales
+      <div class="year-detail">${Object.entries(porAnio[a].cuadros).map(([c,k]) => `Cuadro ${c}: ${k.toLocaleString('es-AR')} kg`).join(' · ')}</div>
+    </div>`).join('')}
+  </div>`;
+}
+function renderDomainList(domain){
+  const cat = currentCategoryConfig(domain);
+  const state = domainState[domain];
+  const holder = document.getElementById('list-' + domain);
+  const items = [...((data[domain] && data[domain][state.location] && data[domain][state.location][state.category]) || [])];
+  const itemsDesc = [...items].sort((a,b) => b.creado - a.creado);
+
+  if(itemsDesc.length === 0){
+    const locLabel = DOMAINS[domain].locations.find(l=>l.key===state.location).label;
+    holder.innerHTML = `<div class="empty-state"><span class="big">${cat.icon || '📋'}</span><p>Todavía no hay registros de "${cat.label}" en ${locLabel}.</p></div>`;
+    return;
+  }
+
+  let statHtml = '';
+  if(cat.costField){
+    const total = items.reduce((s,r) => s + (parseFloat(r[cat.costField]) || 0), 0);
+    statHtml = `<div class="stat-bar">Costo total en insumos: $ ${total.toLocaleString('es-AR')}</div>`;
+  }
+  const deltaMap = cat.trend ? computeTrend(items, cat.trend.field) : {};
+
+  holder.innerHTML = statHtml + itemsDesc.map(r => {
+    const badge = overdueBadge(cat, r);
+    let trendBadge = '';
+    if(cat.trend && deltaMap[r.id] !== undefined){
+      const d = deltaMap[r.id];
+      trendBadge = `<span class="badge-flag ${d>=0?'good':'bad'}">${d>=0?'+':''}${d} ${cat.trend.unit} vs. anterior</span>`;
+    }
+    return `<div class="record-card">
+      <div class="record-top">
+        <div>
+          <h3 class="record-title">${escapeHtml(cat.summary(r))}</h3>
+          <div class="record-meta">
+            ${r.fecha ? `<span>${formatFecha(r.fecha)}</span>` : (r.anio ? `<span>Año ${r.anio}</span>` : '')}
+            <span>${escapeHtml(r.autor)}</span>
+            ${badge}${trendBadge}
+          </div>
+        </div>
+        <div class="record-actions"><button class="icon-btn" title="Eliminar" onclick="deleteDomainRecord('${domain}','${r.id}')">✕</button></div>
+      </div>
+      ${r.detalle ? `<p class="record-desc">${escapeHtml(r.detalle)}</p>` : ''}
+      ${r.foto ? `<img class="record-photo" src="${r.foto}" alt="Foto adjunta">` : ''}
+    </div>`;
+  }).join('');
+
+  if(cat.yearSummary) holder.innerHTML += renderCosechaSummary(items);
+}
+function saveDomainRecord(evt, domain){
+  evt.preventDefault();
+  if(!requireFirebase()) return false;
+  const cat = currentCategoryConfig(domain);
+  const state = domainState[domain];
+  const record = { autor: activeUser, creado: Date.now(), domain, location: state.location, category: state.category };
+  for(const f of cat.fields){
+    const el = document.getElementById(`f-${domain}-${f.id}`);
+    const val = el ? el.value.trim() : '';
+    if(f.required && !val) return false;
+    record[f.id] = val;
+  }
+  if(cat.detailField){ const d = document.getElementById(`f-${domain}-detalle`); record.detalle = d ? d.value.trim() : ''; }
+  if(cat.photoField) record.foto = pendingPhotos[domain] || null;
+  if(cat.computeGestation) record.fechaProbableParto = addDaysISO(record.fechaServicio, record.diasGestacion || 285);
+
+  const id = uid();
+  db.collection('registros').doc(id).set(record).catch(err => { console.error(err); alert('No se pudo guardar en la nube. Revisá tu conexión a internet.'); });
+
+  renderDomainForm(domain);
+  toggleForm(domain + '-record');
+  return false;
+}
+function deleteDomainRecord(domain, id){
+  if(!confirm('¿Eliminar este registro?')) return;
+  if(!requireFirebase()) return;
+  db.collection('registros').doc(id).delete().catch(err => { console.error(err); alert('No se pudo eliminar. Revisá tu conexión.'); });
+}
+
+/* ---------- vehiculos ---------- */
+function vehicleKmActual(v){
+  const kms = [...(v.servicios||[]).map(s=>parseFloat(s.km)), ...(v.combustible||[]).map(c=>parseFloat(c.km))].filter(n => !isNaN(n));
+  return kms.length ? Math.max(...kms) : null;
+}
+function computeConsumo(items){
+  const asc = [...items].sort((a,b) => (parseFloat(a.km)||0) - (parseFloat(b.km)||0));
+  const map = {};
+  for(let i=1;i<asc.length;i++){
+    const kmPrev = parseFloat(asc[i-1].km), kmCur = parseFloat(asc[i].km), litros = parseFloat(asc[i].litros);
+    if(!isNaN(kmPrev) && !isNaN(kmCur) && !isNaN(litros) && litros > 0 && kmCur > kmPrev) map[asc[i].id] = ((kmCur - kmPrev) / litros).toFixed(1);
+  }
+  return map;
+}
+function setVehicleView(vehId, view){ vehicleView[vehId] = view; renderVehiculos(); }
+function vehiclePayload(v){ return { nombre: v.nombre, tipo: v.tipo, patente: v.patente||'', autor: v.autor||activeUser, servicios: v.servicios||[], combustible: v.combustible||[] }; }
+function renderVehiculos(){
+  const holder = document.getElementById('list-vehiculos');
+  if(!data.vehiculos || data.vehiculos.length === 0){
+    holder.innerHTML = `<div class="empty-state"><span class="big">🚜</span><p>Todavía no cargaste ningún vehículo.</p></div>`;
+    return;
+  }
+  holder.innerHTML = data.vehiculos.map(v => {
+    const kmActual = vehicleKmActual(v);
+    const anyDateOverdue = (v.servicios||[]).some(s => isOverdue(s.proximo));
+    const anyKmOverdue = kmActual !== null && (v.servicios||[]).some(s => s.proximoKm && kmActual >= parseFloat(s.proximoKm));
+    const anyOverdue = anyDateOverdue || anyKmOverdue;
+    const view = vehicleView[v.id] === 'combustible' ? 'combustible' : 'servicios';
+    const serviciosOrdenados = [...(v.servicios||[])].sort((a,b) => b.fecha.localeCompare(a.fecha));
+    const combustibleOrdenado = [...(v.combustible||[])].sort((a,b) => (parseFloat(b.km)||0) - (parseFloat(a.km)||0));
+    const consumoMap = computeConsumo(v.combustible||[]);
+
+    return `<div class="vehicle-card">
+      <div class="vehicle-top" onclick="toggleVehicleBody('${v.id}')">
+        <div>
+          <h3 class="vehicle-name">${escapeHtml(v.nombre)}</h3>
+          <div class="vehicle-meta">${v.tipo}${v.patente?' · '+escapeHtml(v.patente):''}${kmActual!==null?' · '+kmActual.toLocaleString('es-AR')+' km':''} · ${(v.servicios||[]).length} service${(v.servicios||[]).length===1?'':'s'}</div>
+        </div>
+        <div class="record-actions">
+          ${anyOverdue ? '<span class="badge-flag danger">Atención requerida</span>' : ''}
+          <button class="icon-btn" title="Eliminar vehículo" onclick="event.stopPropagation(); deleteVehiculo('${v.id}')">✕</button>
+        </div>
+      </div>
+      <div class="vehicle-body ${openVehicle===v.id?'open':''}" id="body-${v.id}">
+        <div class="subtabs">
+          <button class="subtab-btn ${view==='servicios'?'active':''}" onclick="setVehicleView('${v.id}','servicios')">🔧 Services</button>
+          <button class="subtab-btn ${view==='combustible'?'active':''}" onclick="setVehicleView('${v.id}','combustible')">⛽ Combustible</button>
+        </div>
+
+        ${view === 'servicios' ? `
+        <button class="btn-primary" style="margin-bottom:12px;" onclick="toggleForm('service-${v.id}')">+ Registrar service</button>
+        <form class="card-form" id="form-service-${v.id}" onsubmit="return saveService(event,'${v.id}')">
+          <div class="row2">
+            <div class="field"><label>Tipo de service</label><select id="tipo-service-${v.id}">${SERVICE_TYPES.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+            <div class="field"><label>Kilometraje (opcional)</label><input type="number" id="km-service-${v.id}" placeholder="Ej: 84000"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Fecha</label><input type="date" id="fecha-service-${v.id}" value="${todayISO()}" required></div>
+            <div class="field"><label>Próximo service (fecha, opcional)</label><input type="date" id="proximo-service-${v.id}"></div>
+          </div>
+          <div class="field"><label>Próximo service (kilometraje, opcional)</label><input type="number" id="proximokm-service-${v.id}" placeholder="Ej: 94000"></div>
+          ${fieldWithMicHtml('detalle-service-'+v.id, 'Detalle', 'Qué se hizo, repuestos, taller...')}
+          ${photoFieldHtml('service-'+v.id)}
+          <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="toggleForm('service-${v.id}')">Cancelar</button></div>
+        </form>
+        <div class="service-list">
+          ${serviciosOrdenados.length===0 ? '<p style="font-size:13px;color:var(--gris-600);">Sin services cargados todavía.</p>' :
+            serviciosOrdenados.map(s => {
+              const dateOverdue = isOverdue(s.proximo);
+              const kmOverdue = kmActual !== null && s.proximoKm && kmActual >= parseFloat(s.proximoKm);
+              return `<div class="service-item ${dateOverdue||kmOverdue?'overdue':''}">
+                <div class="service-info">
+                  <b>${s.tipo}${s.km?' · '+s.km+' km':''}</b>
+                  <div class="service-meta">${formatFecha(s.fecha)} · ${escapeHtml(s.autor)}</div>
+                  ${s.detalle ? `<div style="margin-top:4px;">${escapeHtml(s.detalle)}</div>` : ''}
+                  ${s.proximo ? `<div class="service-next ${dateOverdue?'overdue':''}">Próximo service: ${formatFecha(s.proximo)}${dateOverdue?' (vencido)':''}</div>` : ''}
+                  ${s.proximoKm ? `<div class="service-next ${kmOverdue?'overdue':''}">Próximo service a los: ${s.proximoKm} km${kmOverdue?' (vencido)':''}</div>` : ''}
+                  ${s.foto ? `<img class="record-photo" src="${s.foto}" alt="Foto adjunta" style="max-height:160px;">` : ''}
+                </div>
+                <button class="icon-btn" title="Eliminar" onclick="deleteService('${v.id}','${s.id}')">✕</button>
+              </div>`;
+            }).join('')
+          }
+        </div>` : `
+        <button class="btn-primary" style="margin-bottom:12px;" onclick="toggleForm('combustible-${v.id}')">+ Registrar carga</button>
+        <form class="card-form" id="form-combustible-${v.id}" onsubmit="return saveCombustible(event,'${v.id}')">
+          <div class="row2">
+            <div class="field"><label>Fecha</label><input type="date" id="fecha-combustible-${v.id}" value="${todayISO()}" required></div>
+            <div class="field"><label>Kilometraje</label><input type="number" id="km-combustible-${v.id}" required placeholder="Ej: 85200"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>Litros cargados</label><input type="number" id="litros-combustible-${v.id}" required placeholder="Ej: 45"></div>
+            <div class="field"><label>Costo (opcional)</label><input type="number" id="costo-combustible-${v.id}" placeholder="Ej: 60000"></div>
+          </div>
+          <div class="form-actions"><button type="submit" class="btn-save">Guardar</button><button type="button" class="btn-cancel" onclick="toggleForm('combustible-${v.id}')">Cancelar</button></div>
+        </form>
+        <div class="service-list">
+          ${combustibleOrdenado.length===0 ? '<p style="font-size:13px;color:var(--gris-600);">Sin cargas de combustible todavía.</p>' :
+            combustibleOrdenado.map(c => `<div class="service-item">
+              <div class="service-info">
+                <b>${c.litros} L · ${c.km} km</b>
+                <div class="service-meta">${formatFecha(c.fecha)} · ${escapeHtml(c.autor)}${c.costo?' · $ '+parseFloat(c.costo).toLocaleString('es-AR'):''}</div>
+                ${consumoMap[c.id] ? `<div class="service-next">Rendimiento: ${consumoMap[c.id]} km/litro</div>` : ''}
+              </div>
+              <button class="icon-btn" title="Eliminar" onclick="deleteCombustible('${v.id}','${c.id}')">✕</button>
+            </div>`).join('')
+          }
+        </div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleVehicleBody(id){ openVehicle = openVehicle === id ? null : id; renderVehiculos(); }
+function saveVehiculo(evt){
+  evt.preventDefault();
+  if(!requireFirebase()) return false;
+  const nombre = document.getElementById('nombre-vehiculo').value.trim();
+  if(!nombre) return false;
+  const id = uid();
+  db.collection('vehiculos').doc(id).set({
+    nombre, tipo: document.getElementById('tipo-vehiculo').value, patente: document.getElementById('patente-vehiculo').value.trim(),
+    autor: activeUser, servicios: [], combustible: []
+  }).catch(err => { console.error(err); alert('No se pudo guardar en la nube.'); });
+  document.getElementById('nombre-vehiculo').value = ''; document.getElementById('patente-vehiculo').value = '';
+  toggleForm('vehiculo-nuevo');
+  return false;
+}
+function deleteVehiculo(id){
+  if(!confirm('¿Eliminar este vehículo y todo su historial?')) return;
+  if(!requireFirebase()) return;
+  db.collection('vehiculos').doc(id).delete().catch(err => { console.error(err); alert('No se pudo eliminar.'); });
+}
+function saveService(evt, vehId){
+  evt.preventDefault();
+  if(!requireFirebase()) return false;
+  const fecha = document.getElementById('fecha-service-'+vehId).value;
+  if(!fecha) return false;
+  const v = data.vehiculos.find(x=>x.id===vehId); if(!v) return false;
+  const nuevoServicio = {
+    id: uid(), tipo: document.getElementById('tipo-service-'+vehId).value, km: document.getElementById('km-service-'+vehId).value.trim(), fecha,
+    proximo: document.getElementById('proximo-service-'+vehId).value || null,
+    proximoKm: document.getElementById('proximokm-service-'+vehId).value || null,
+    detalle: document.getElementById('detalle-service-'+vehId).value.trim(),
+    foto: pendingPhotos['service-'+vehId] || null, autor: activeUser, creado: Date.now()
+  };
+  const payload = vehiclePayload(v);
+  payload.servicios = [...(v.servicios||[]), nuevoServicio];
+  db.collection('vehiculos').doc(vehId).set(payload).catch(err => { console.error(err); alert('No se pudo guardar en la nube.'); });
+  openVehicle = vehId; clearPhotoInput('service-'+vehId);
+  return false;
+}
+function deleteService(vehId, serviceId){
+  if(!requireFirebase()) return;
+  const v = data.vehiculos.find(x=>x.id===vehId); if(!v) return;
+  const payload = vehiclePayload(v);
+  payload.servicios = (v.servicios||[]).filter(s=>s.id!==serviceId);
+  openVehicle = vehId;
+  db.collection('vehiculos').doc(vehId).set(payload).catch(err => { console.error(err); alert('No se pudo eliminar.'); });
+}
+function saveCombustible(evt, vehId){
+  evt.preventDefault();
+  if(!requireFirebase()) return false;
+  const fecha = document.getElementById('fecha-combustible-'+vehId).value;
+  const km = document.getElementById('km-combustible-'+vehId).value;
+  const litros = document.getElementById('litros-combustible-'+vehId).value;
+  if(!fecha || !km || !litros) return false;
+  const v = data.vehiculos.find(x=>x.id===vehId); if(!v) return false;
+  const nuevaCarga = { id: uid(), fecha, km, litros, costo: document.getElementById('costo-combustible-'+vehId).value || null, autor: activeUser, creado: Date.now() };
+  const payload = vehiclePayload(v);
+  payload.combustible = [...(v.combustible||[]), nuevaCarga];
+  db.collection('vehiculos').doc(vehId).set(payload).catch(err => { console.error(err); alert('No se pudo guardar en la nube.'); });
+  openVehicle = vehId;
+  return false;
+}
+function deleteCombustible(vehId, id){
+  if(!requireFirebase()) return;
+  const v = data.vehiculos.find(x=>x.id===vehId); if(!v) return;
+  const payload = vehiclePayload(v);
+  payload.combustible = (v.combustible||[]).filter(c=>c.id!==id);
+  openVehicle = vehId;
+  db.collection('vehiculos').doc(vehId).set(payload).catch(err => { console.error(err); alert('No se pudo eliminar.'); });
+}
+
+/* ---------- global search ---------- */
+function runGlobalSearch(q){
+  q = q.trim().toLowerCase();
+  const holder = document.getElementById('search-results');
+  if(!q){ holder.style.display = 'none'; holder.innerHTML = ''; return; }
+  const matches = [];
+  ['animales','frutales'].forEach(domain => {
+    DOMAINS[domain].locations.forEach(loc => {
+      DOMAINS[domain].categories.forEach(cat => {
+        ((data[domain] && data[domain][loc.key] && data[domain][loc.key][cat.key]) || []).forEach(r => {
+          if(Object.values(r).join(' ').toLowerCase().includes(q)){
+            matches.push({domain, locKey:loc.key, locLabel:loc.label, catKey:cat.key, catLabel:cat.label, title:cat.summary(r), autor:r.autor, fecha:r.fecha||(r.anio?('Año '+r.anio):'')});
+          }
+        });
+      });
+    });
+  });
+  (data.vehiculos||[]).forEach(v => {
+    if([v.nombre,v.tipo,v.patente,v.autor].join(' ').toLowerCase().includes(q)) matches.push({vehiculo:true, vehId:v.id, title:v.nombre, autor:v.autor, fecha:''});
+    (v.servicios||[]).forEach(s => { if(Object.values(s).join(' ').toLowerCase().includes(q)) matches.push({vehiculo:true, vehId:v.id, title:`${v.nombre} · ${s.tipo}`, autor:s.autor, fecha:s.fecha}); });
+    (v.combustible||[]).forEach(c => { if(Object.values(c).join(' ').toLowerCase().includes(q)) matches.push({vehiculo:true, vehId:v.id, title:`${v.nombre} · Carga de combustible`, autor:c.autor, fecha:c.fecha}); });
+  });
+
+  if(matches.length === 0){
+    holder.innerHTML = `<div class="search-empty">Sin resultados para "${escapeHtml(q)}".</div>`;
+  }else{
+    holder.innerHTML = matches.slice(0,40).map(m => m.vehiculo
+      ? `<div class="search-result" onclick="goToVehicle('${m.vehId}')"><span class="sr-tag">Vehículos</span><span class="sr-title">${escapeHtml(m.title)}</span><span class="sr-meta">${m.fecha?formatFecha(m.fecha):''} · ${escapeHtml(m.autor||'')}</span></div>`
+      : `<div class="search-result" onclick="goToResult('${m.domain}','${m.locKey}','${m.catKey}')"><span class="sr-tag">${m.domain==='animales'?'Animales':'Frutales'} · ${m.locLabel} · ${m.catLabel}</span><span class="sr-title">${escapeHtml(m.title)}</span><span class="sr-meta">${m.fecha} · ${escapeHtml(m.autor||'')}</span></div>`
+    ).join('');
+  }
+  holder.style.display = 'block';
+}
+function goToResult(domain, locKey, catKey){ switchSection(domain); switchLocation(domain, locKey); switchCategory(domain, catKey); clearSearch(); }
+function goToVehicle(vehId){ switchSection('vehiculos'); openVehicle = vehId; renderVehiculos(); clearSearch(); }
+function clearSearch(){ document.getElementById('global-search').value = ''; document.getElementById('search-results').style.display = 'none'; }
+
+/* ---------- tools panel: dark mode, export, backup, weekly summary ---------- */
+function toggleTools(){ document.getElementById('tools-panel').classList.toggle('open'); }
+function toggleDarkMode(){
+  document.body.classList.toggle('dark');
+  try{ localStorage.setItem(DARK_KEY, document.body.classList.contains('dark') ? '1' : '0'); }catch(e){}
+}
+function downloadBlob(content, filename, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function exportCSV(){
+  const rows = [['Sección','Ubicación','Categoría','Fecha','Resumen','Autor','Detalle']];
+  ['animales','frutales'].forEach(domain => {
+    DOMAINS[domain].locations.forEach(loc => {
+      DOMAINS[domain].categories.forEach(cat => {
+        ((data[domain] && data[domain][loc.key] && data[domain][loc.key][cat.key]) || []).forEach(r => {
+          rows.push([domain==='animales'?'Animales':'Frutales', loc.label, cat.label, r.fecha||(r.anio?('Año '+r.anio):''), cat.summary(r), r.autor||'', (r.detalle||'').replace(/\n/g,' ')]);
+        });
+      });
+    });
+  });
+  (data.vehiculos||[]).forEach(v => {
+    rows.push(['Vehículos', v.nombre, 'Vehículo', '', `${v.tipo}${v.patente?' · '+v.patente:''}`, v.autor||'', '']);
+    (v.servicios||[]).forEach(s => rows.push(['Vehículos', v.nombre, 'Service', s.fecha, `${s.tipo}${s.km?' · '+s.km+' km':''}`, s.autor||'', (s.detalle||'').replace(/\n/g,' ')]));
+    (v.combustible||[]).forEach(c => rows.push(['Vehículos', v.nombre, 'Combustible', c.fecha, `${c.litros} L · ${c.km} km`, c.autor||'', '']));
+  });
+  const csv = rows.map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob('\uFEFF' + csv, 'cuaderno-de-campo.csv', 'text/csv;charset=utf-8;');
+}
+function downloadBackup(){ downloadBlob(JSON.stringify(data, null, 2), `cuaderno-backup-${todayISO()}.json`, 'application/json'); }
+function restoreBackup(evt){
+  const file = evt.target.files[0]; if(!file) return;
+  if(!requireFirebase()){ evt.target.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try{ parsed = JSON.parse(reader.result); }
+    catch(e){ alert('El archivo no es una copia de seguridad válida.'); evt.target.value=''; return; }
+    if(!confirm('Esto va a reemplazar TODOS los datos compartidos (de todos los que usan el cuaderno) por los del archivo de respaldo. ¿Continuar?')){ evt.target.value=''; return; }
+    showSyncBanner('Restaurando copia de seguridad...', 'info');
+    Promise.all([db.collection('registros').get(), db.collection('vehiculos').get()])
+      .then(([regSnap, vehSnap]) => Promise.all([...regSnap.docs.map(d=>d.ref.delete()), ...vehSnap.docs.map(d=>d.ref.delete())]))
+      .then(() => {
+        const writes = [];
+        ['animales','frutales'].forEach(domain => {
+          if(parsed[domain]){
+            DOMAINS[domain].locations.forEach(loc => {
+              if(parsed[domain][loc.key]){
+                DOMAINS[domain].categories.forEach(cat => {
+                  (parsed[domain][loc.key][cat.key]||[]).forEach(r => {
+                    const rec = { ...r, domain, location: loc.key, category: cat.key };
+                    const id = rec.id || uid(); delete rec.id;
+                    writes.push(db.collection('registros').doc(id).set(rec));
+                  });
+                });
+              }
+            });
+          }
+        });
+        (parsed.vehiculos||[]).forEach(v => {
+          const id = v.id || uid();
+          writes.push(db.collection('vehiculos').doc(id).set({ nombre:v.nombre, tipo:v.tipo, patente:v.patente||'', autor:v.autor||'', servicios:v.servicios||[], combustible:v.combustible||[] }));
+        });
+        return Promise.all(writes);
+      })
+      .then(() => { hideSyncBanner(); alert('Copia de seguridad restaurada correctamente.'); })
+      .catch(err => { console.error(err); hideSyncBanner(); alert('Hubo un error al restaurar la copia de seguridad.'); });
+    evt.target.value = '';
+  };
+  reader.readAsText(file);
+}
+function toggleWeeklySummary(){
+  const el = document.getElementById('weekly-summary');
+  el.classList.toggle('open');
+  if(el.classList.contains('open')) renderWeeklySummary();
+}
+function renderWeeklySummary(){
+  const holder = document.getElementById('weekly-summary-content');
+  const cutoff = Date.now() - 7*24*60*60*1000;
+  let items = [];
+  ['animales','frutales'].forEach(domain => {
+    DOMAINS[domain].locations.forEach(loc => {
+      DOMAINS[domain].categories.forEach(cat => {
+        ((data[domain] && data[domain][loc.key] && data[domain][loc.key][cat.key]) || []).forEach(r => {
+          if(r.creado >= cutoff) items.push({autor:r.autor, texto:`${domain==='animales'?'Animales':'Frutales'} · ${loc.label} · ${cat.label}: ${cat.summary(r)}`, creado:r.creado});
+        });
+      });
+    });
+  });
+  (data.vehiculos||[]).forEach(v => {
+    (v.servicios||[]).forEach(s => { if(s.creado >= cutoff) items.push({autor:s.autor, texto:`Vehículos · ${v.nombre}: ${s.tipo}`, creado:s.creado}); });
+    (v.combustible||[]).forEach(c => { if(c.creado >= cutoff) items.push({autor:c.autor, texto:`Vehículos · ${v.nombre}: carga de combustible`, creado:c.creado}); });
+  });
+  items.sort((a,b) => b.creado - a.creado);
+  if(items.length === 0){ holder.innerHTML = '<p style="font-size:13px;color:var(--gris-600);">No se cargó nada en los últimos 7 días.</p>'; return; }
+  const counts = {};
+  items.forEach(i => { counts[i.autor] = (counts[i.autor]||0) + 1; });
+  const countsHtml = Object.entries(counts).map(([autor,n]) => `<span class="badge-flag info">${escapeHtml(autor)}: ${n}</span>`).join(' ');
+  const listHtml = items.slice(0,30).map(i => `<div class="weekly-item"><b>${escapeHtml(i.autor)}</b> — ${escapeHtml(i.texto)}</div>`).join('');
+  holder.innerHTML = `<div class="weekly-counts">${countsHtml}</div><div>${listHtml}</div>`;
+}
+
+/* ---------- boot ---------- */
+function renderAll(){
+  ['animales','frutales'].forEach(domain => { renderDomainNav(domain); renderDomainForm(domain); renderDomainList(domain); });
+  renderAnimalesStat();
+  renderPlano();
+  renderVehiculos();
+}
+function init(){
+  buildUserGrid();
+  data = emptyData();
+  try{ if(localStorage.getItem(DARK_KEY) === '1'){ document.body.classList.add('dark'); document.getElementById('dark-toggle').checked = true; } }catch(e){}
+  initFirebase();
+  let savedUser = null;
+  try{ savedUser = localStorage.getItem(USER_KEY); }catch(e){}
+  if(savedUser && USERS.includes(savedUser)){ activeUser = savedUser; enterApp(); }
+}
+init();
+</script>
+
+</body>
+</html>
